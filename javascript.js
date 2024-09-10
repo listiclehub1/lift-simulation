@@ -1,6 +1,7 @@
 "use-strict";
 const allLifts = [];
 const liftQueue = [];
+let timeouts = [];
 
 document.getElementById("form").addEventListener("submit", function (event) {
   event.preventDefault();
@@ -15,7 +16,10 @@ document.getElementById("form").addEventListener("submit", function (event) {
     alert("Floors and lifts must be more than 0");
     return 0;
   }
-  allLifts.length = [];
+  allLifts.length = 0;
+  liftQueue.length = 0;
+  timeouts.forEach((timer) => clearTimeout(timer));
+  timeouts = [];
 
   createFloors(floors, lifts);
   createLifts(lifts);
@@ -38,15 +42,17 @@ function createFloors(floors, lifts) {
     buttonsDiv.className = "floor-buttons";
 
     const upButton = document.createElement("button");
+    upButton.className = "up";
     upButton.innerText = "Up";
     upButton.onclick = function () {
-      callLift(i);
+      callLift(i, "up");
     };
 
     const downButton = document.createElement("button");
+    downButton.className = "down";
     downButton.innerText = "Down";
     downButton.onclick = function () {
-      callLift(i);
+      callLift(i, "down");
     };
 
     if (i != floors) buttonsDiv.appendChild(upButton);
@@ -89,17 +95,22 @@ function createLifts(lifts) {
 
     allLifts.push({
       id: `lift-${j}`,
-      currentFloor: 1,
+      floor: 1,
       busy: false,
+      direction: "up",
     });
   }
 }
 
-function callLift(floor) {
+function callLift(floor, direction) {
+  const button = document
+    .getElementById(`floor-${floor}`)
+    .querySelector(`button.${direction}`);
+  button.disabled = true;
   const idleLifts = allLifts.filter((lift) => !lift.busy);
   if (idleLifts.length === 0) {
     console.log(liftQueue);
-    liftQueue.push(floor);
+    liftQueue.push({ floor, direction });
     return;
   }
   console.log(`Lift called at floor ${floor}`);
@@ -108,20 +119,20 @@ function callLift(floor) {
   let minDistance = Number.MAX_SAFE_INTEGER;
 
   idleLifts.forEach((lift) => {
-    const distance = Math.abs(lift.currentFloor - floor);
+    const distance = Math.abs(lift.floor - floor);
     if (distance < minDistance) {
       minDistance = distance;
       closestLift = lift;
     }
   });
-
+  closestLift.direction = direction;
   moveLift(closestLift, floor);
 }
 
 function moveLift(lift, targetFloor) {
   const liftElement = document.getElementById(lift.id);
 
-  const time = Math.abs(lift.currentFloor - targetFloor) * 2 * 1000;
+  const time = Math.abs(lift.floor - targetFloor) * 2 * 1000;
   const floorHeight = 120;
 
   lift.busy = true;
@@ -131,13 +142,16 @@ function moveLift(lift, targetFloor) {
 
   liftElement.style.transitionDuration = `${time / 1000}s`;
 
-  setTimeout(function () {
+  const moveTime = setTimeout(function () {
     console.log(`${lift.id} reached floor ${targetFloor}`);
+    lift.floor = targetFloor;
     doors(lift, targetFloor);
   }, time);
+
+  timeouts.push(moveTime);
 }
 
-function doors(lift, floor) {
+function doors(lift) {
   const liftElement = document.getElementById(lift.id);
   const leftDoor = liftElement.querySelector(".lift-doors .door.left");
   const rightDoor = liftElement.querySelector(".lift-doors .door.right");
@@ -145,16 +159,21 @@ function doors(lift, floor) {
   leftDoor.style.width = "0%";
   rightDoor.style.width = "0%";
 
-  setTimeout(function () {
+  const doorTime = setTimeout(function () {
     leftDoor.style.width = "50%";
     rightDoor.style.width = "50%";
-
-    setTimeout(function () {
-      lift.currentFloor = floor;
+    const openTime = setTimeout(function () {
+      const button = document
+        .getElementById(`floor-${lift.floor}`)
+        .querySelector(`button.${lift.direction}`);
+      button.disabled = false;
       lift.busy = false;
       if (liftQueue.length > 0) {
-        callLift(liftQueue.shift());
+        const next = liftQueue.shift();
+        callLift(next.floor, next.direction);
       }
     }, 2500);
+    timeouts.push(openTime);
   }, 2500);
+  timeouts.push(doorTime);
 }

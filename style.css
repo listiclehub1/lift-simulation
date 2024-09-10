@@ -1,3 +1,8 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
 #container {
   display: flex;
   flex-direction: column-reverse;
@@ -11,9 +16,12 @@ form {
   align-items: flex-start;
 }
 
+input {
+  width: 50px;
+}
 .floor {
   display: flex;
-  min-height: 120px;
+  height: 120px;
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid black;
