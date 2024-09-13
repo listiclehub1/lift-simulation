@@ -56,6 +56,12 @@ function createFloors(floors, lifts) {
     };
 
     if (i != floors) buttonsDiv.appendChild(upButton);
+
+    const liftNumber = document.createElement("div");
+    liftNumber.className = "lift-number";
+    liftNumber.innerText = "lift-0";
+    buttonsDiv.appendChild(liftNumber);
+
     if (i != 1) buttonsDiv.appendChild(downButton);
 
     const liftContainer = document.createElement("div");
@@ -136,6 +142,14 @@ function moveLift(lift, targetFloor) {
   const floorHeight = 120;
 
   lift.busy = true;
+  const liftNumber = document
+    .getElementById(`floor-${targetFloor}`)
+    .querySelector(".floor-buttons .lift-number");
+  if (lift.direction === "up") {
+    liftNumber.innerText = `↑${lift.id}`;
+  } else {
+    liftNumber.innerText = `↓${lift.id}`;
+  }
   liftElement.style.transform = `translateY(-${
     (targetFloor - 1) * floorHeight
   }px)`;

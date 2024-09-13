@@ -78,3 +78,10 @@ input {
   background-color: orange;
   transition: width 2.5s linear;
 }
+
+.lift-number {
+  border: 2px solid black;
+  align-self: center;
+  text-align: center;
+  padding: 1px 2px;
+}
