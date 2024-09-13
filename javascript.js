@@ -12,10 +12,16 @@ document.getElementById("form").addEventListener("submit", function (event) {
   const building = document.getElementById("container");
   building.innerHTML = "";
 
-  if (floors < 1 || lifts < 1) {
-    alert("Floors and lifts must be more than 0");
+  if (floors < 1) {
+    alert("Floors must be more than 0");
     return 0;
   }
+
+  if (lifts < 0) {
+    alert("Lifts cannot be negative");
+    return 0;
+  }
+
   allLifts.length = 0;
   liftQueue.length = 0;
   timeouts.forEach((timer) => clearTimeout(timer));
