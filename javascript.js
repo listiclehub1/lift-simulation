@@ -12,6 +12,11 @@ document.getElementById("form").addEventListener("submit", function (event) {
   const building = document.getElementById("container");
   building.innerHTML = "";
 
+  if (!floors || !lifts) {
+    alert("Please enter valid Positive number.")
+    return 0;
+  }
+
   if (floors < 1) {
     alert("Floors must be more than 0");
     return 0;
